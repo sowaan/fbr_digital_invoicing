@@ -1,6 +1,6 @@
 ### FBR Digital Invoicing 
 
-App to integrate FBR Digital Invoicing.
+SowaanERP integration with FBR Digital Invoicing.
 
 ### Installation
 
