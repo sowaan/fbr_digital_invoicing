@@ -85,6 +85,8 @@ class SalesInvoice(SalesInvoiceController):
         if self.is_return:
             ref_no = frappe.db.get_value("Sales Invoice",self.return_against, "custom_fbr_invoice_no")
             data["invoiceRefNo"] = ref_no+""
+            data["reason"] = self.get("custom_return_reason")
+            # data["reasonRemarks"] = self.get("custom_other_reason")
 
         data["invoiceDate"] = str(self.posting_date)
         

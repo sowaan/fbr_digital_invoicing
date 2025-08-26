@@ -5,6 +5,17 @@ app_description = "SowaanERP integration with FBR Digital Invoicing."
 app_email = "info@sowaanerp.com"
 app_license = "mit"
 
+fixtures = [
+	{
+        "doctype":"Custom Field",
+		"filters":[
+			[
+				"module", "=", "FBR Digital Invoicing"
+			]
+		]
+	}    
+]
+
 # Apps
 # ------------------
 
