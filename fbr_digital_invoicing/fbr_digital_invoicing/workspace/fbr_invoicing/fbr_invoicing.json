@@ -1,0 +1,104 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"iXlfQQ99Ic\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">FBR Digital Invoicing</span>\",\"col\":12}},{\"id\":\"bdU7CWBSwa\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"GQn1GqwXT7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"FBR Invoicing Settings\",\"col\":3}},{\"id\":\"iN9Roi_kA2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"HS Code UOMs\",\"col\":3}},{\"id\":\"j05NWyeKU1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Request Logs\",\"col\":3}},{\"id\":\"vjXHaFiEQ8\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4kY1s3__E0\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"id\":\"mVJdPHEFEm\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}}]",
+ "creation": "2025-08-26 14:09:10.307642",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "integration",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "FBR Invoicing",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Masters",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Items",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transactions",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoices",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Request Logs",
+   "link_count": 0,
+   "link_to": "FDI Request Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-08-26 14:15:35.152015",
+ "modified_by": "Administrator",
+ "module": "FBR Digital Invoicing",
+ "name": "FBR Invoicing",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 7.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "format": "{}",
+   "label": "FBR Invoicing Settings",
+   "link_to": "FBR Digital Invoicing Setting",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "HS Code UOMs",
+   "link_to": "HS Code",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Request Logs",
+   "link_to": "FDI Request Log",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "FBR Invoicing"
+}
