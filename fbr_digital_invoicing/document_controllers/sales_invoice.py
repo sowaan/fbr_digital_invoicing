@@ -24,14 +24,13 @@ class SalesInvoice(SalesInvoiceController):
         if not frappe.db.exists("FBR Digital Invoicing Setting", self.company):
             frappe.throw("FBR Digital Invoicing Settings not found for company: {}".format(self.company))
 
-        data = self.get_mapped_data()
+        settings = frappe.get_doc("FBR Digital Invoicing Setting", self.company)
+        data = self.get_mapped_data(settings)
         api_log = frappe.new_doc("FDI Request Log")
         api_log.request_data = frappe.as_json(data, indent=4)
         try:
-            settings = frappe.get_doc("FBR Digital Invoicing Setting", self.company)
             api = FBRDigitalInvoicingAPI(self.company)
-            print(self.get_mapped_data())
-            response = api.make_request("POST", settings.get("invoice_post_method"), self.get_mapped_data())
+            response = api.make_request("POST", settings.get("invoice_post_method"), data)
             resdata = response.get("validationResponse")
             
             if resdata.get("status") == "Valid":
@@ -52,7 +51,7 @@ class SalesInvoice(SalesInvoiceController):
                 api_log.response_data = frappe.as_json(response, indent=4)
                 api_log.save()
                 frappe.throw(
-                    "Error in FBR Digital Invoicing" 
+                    f"Error in FBR Digital Invoicing: {resdata.get('error')}"
                 )
                   
                 
@@ -70,7 +69,7 @@ class SalesInvoice(SalesInvoiceController):
             frappe.throw(f"Error while submitting invoice to FBR: {str(e)}")
 
         api_log.save()
-    def get_mapped_data(self):
+    def get_mapped_data(self, settings):
         company = frappe.get_doc("Company", self.company)
         customer = frappe.get_doc("Customer", self.customer)
         if not customer.customer_primary_address:
@@ -105,7 +104,11 @@ class SalesInvoice(SalesInvoiceController):
         buyerAddress = customer.primary_address if customer.primary_address else ""
         data["buyerAddress"] = self.normalize_address(buyerAddress)
         data["buyerRegistrationType"] = "Unregistered" if not customer.tax_id else "Registered"
-        data["scenarioId"] = "SN002" if not customer.tax_id else "SN001"  # Adjust based on your logic
+        if settings.environment == "Sandbox":
+            if not self.custom_sn_id:
+                data["scenarioId"] = "SN002" if not customer.tax_id else "SN001"  # Adjust based on your logic
+            else:
+                data["scenarioId"] = self.custom_sn_id
 
         data["items"] = self.get_items()
         
@@ -172,19 +175,23 @@ class SalesInvoice(SalesInvoiceController):
         return normalized
 
 @frappe.whitelist()
-def post_to_fbr(docname):
+def post_to_fbr(docname, sn_id=None):
     doc = frappe.get_doc("Sales Invoice", docname)
     if not frappe.db.exists("FBR Digital Invoicing Setting", doc.company):
         frappe.throw("FBR Digital Invoicing Settings not found for company: {}".format(doc.company))
         
-    if doc.docstatus != 1 or doc.custom_post_to_fdi:
+    if doc.custom_post_to_fdi:
         frappe.throw("Already synced to FDI.")
+    if doc.docstatus != 1:
+        frappe.throw("Invoice is not submitted yet, please submit the invoice and try again.")
 
     if len(doc.taxes) == 0:
             frappe.throw("No taxes found to submit to FBR.")
         
 
     frappe.db.set_value("Sales Invoice", doc.name, "custom_post_to_fdi", 1)
+    if sn_id:
+        frappe.db.set_value("Sales Invoice", doc.name, "custom_sn_id", sn_id)
 
     doc = frappe.get_doc("Sales Invoice", docname)
     doc.run_method("on_submit")

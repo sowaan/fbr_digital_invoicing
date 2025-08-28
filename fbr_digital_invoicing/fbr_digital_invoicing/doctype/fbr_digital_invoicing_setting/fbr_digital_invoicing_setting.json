@@ -6,13 +6,22 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "settings_tab",
   "credentials_section",
+  "environment",
   "company",
   "base_url",
   "invoice_validate_method",
   "invoice_post_method",
   "token",
-  "column_break_tixw"
+  "column_break_tixw",
+  "scenario_testing_tab",
+  "scenario_id",
+  "column_break_trge",
+  "sales_invoice",
+  "test_scenario",
+  "section_break_sxgm",
+  "small_text_pdjz"
  ],
  "fields": [
   {
@@ -60,12 +69,58 @@
    "options": "Company",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "Sandbox",
+   "fieldname": "environment",
+   "fieldtype": "Select",
+   "label": "Environment",
+   "options": "Sandbox\nProduction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "scenario_testing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Scenario Testing"
+  },
+  {
+   "fieldname": "scenario_id",
+   "fieldtype": "Data",
+   "label": "Scenario Id"
+  },
+  {
+   "fieldname": "column_break_trge",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "label": "Sales Invoice"
+  },
+  {
+   "fieldname": "test_scenario",
+   "fieldtype": "Button",
+   "label": "Test Scenario"
+  },
+  {
+   "fieldname": "section_break_sxgm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "small_text_pdjz",
+   "fieldtype": "Small Text",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-22 14:52:58.493517",
+ "modified": "2025-08-28 11:07:17.294591",
  "modified_by": "Administrator",
  "module": "FBR Digital Invoicing",
  "name": "FBR Digital Invoicing Setting",
