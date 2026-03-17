@@ -25,6 +25,7 @@ class SalesInvoice(SalesInvoiceController):
             frappe.throw("FBR Digital Invoicing Settings not found for company: {}".format(self.company))
 
         settings = frappe.get_doc("FBR Digital Invoicing Setting", self.company)
+        frappe.log_error("on submit", f"{self} - {self.custom_sro_no}")
         data = self.get_mapped_data(settings)
         api_log = frappe.new_doc("FDI Request Log")
         api_log.request_data = frappe.as_json(data, indent=4)
@@ -82,6 +83,9 @@ class SalesInvoice(SalesInvoiceController):
         if not customer_address.state:
             frappe.throw("Customer primary address does not have a State/Province.")
 
+        sale_type = self.custom_sale_type if self.custom_sale_type else "Goods at standard rate (default)"
+        frappe.log_error("get mapped data", f"{self} - {self.custom_sro_no}")
+
         data = {}
         data["invoiceType"] = "Debit Note" if self.is_return else "Sale Invoice"
         
@@ -122,6 +126,9 @@ class SalesInvoice(SalesInvoiceController):
     
     def get_items(self):
         items = []
+        sale_type = self.custom_sale_type if self.custom_sale_type else "Goods at standard rate (default)"
+        sro_no = self.custom_sro_no if self.custom_sro_no else ""
+        frappe.log_error("get items self", f"{self} - {self.custom_sro_no}")
         for item in self.items:
             if not item.custom_hs_code:
                 item.custom_hs_code = self.get_and_set_hs_code(item)
@@ -136,16 +143,16 @@ class SalesInvoice(SalesInvoiceController):
                 "quantity": abs(item.qty),
                 "totalValues": 0,  # Placeholder, adjust as needed
                 "valueSalesExcludingST": abs(item.amount),
-                "fixedNotifiedValueOrRetailPrice": 0,  # Placeholder, adjust as needed
+                "fixedNotifiedValueOrRetailPrice": abs(item.amount),  # Placeholder, adjust as needed
                 "salesTaxApplicable": round(abs(item.amount) * self.taxes[0].rate /100, 2) if self.taxes else 0,  # Assuming first tax is sales tax
                 "salesTaxWithheldAtSource": 0,  # Placeholder, adjust as needed
                 "extraTax": "",  # Placeholder, adjust as needed
                 "furtherTax": 0,  # Assuming first tax is further tax
-                "sroScheduleNo": "",  # Placeholder, adjust as needed
+                "sroScheduleNo": sro_no, #"SRO 1842(I)/2023",  # Placeholder, adjust as needed
                 "fedPayable": 0,  # Placeholder, adjust as needed
                 "discount": cint(item.discount_amount) or 0,
-                "saleType": "Goods at standard rate (default)",  # Adjust based on your logic
-                "sroItemSerialNo": ""  # Placeholder, adjust as needed
+                "saleType": sale_type, # "Goods at standard rate (default)",  # Adjust based on your logic
+                "sroItemSerialNo": "1" if self.custom_sro_no else ""  # Placeholder, adjust as needed
             }
             items.append(item_data)
         return items
