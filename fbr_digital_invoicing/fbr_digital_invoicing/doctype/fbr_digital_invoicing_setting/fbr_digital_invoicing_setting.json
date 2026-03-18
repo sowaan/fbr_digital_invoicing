@@ -8,17 +8,18 @@
  "field_order": [
   "settings_tab",
   "credentials_section",
-  "environment",
   "company",
   "base_url",
   "invoice_validate_method",
   "invoice_post_method",
   "token",
   "column_break_tixw",
+  "environment",
+  "use_dummy_data",
   "scenario_testing_tab",
   "scenario_id",
-  "column_break_trge",
   "sales_invoice",
+  "column_break_trge",
   "test_scenario",
   "section_break_sxgm",
   "small_text_pdjz"
@@ -115,12 +116,18 @@
    "fieldname": "small_text_pdjz",
    "fieldtype": "Small Text",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_dummy_data",
+   "fieldtype": "Check",
+   "label": "Use Dummy Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-28 11:07:17.294591",
+ "modified": "2026-03-18 13:52:19.514636",
  "modified_by": "Administrator",
  "module": "FBR Digital Invoicing",
  "name": "FBR Digital Invoicing Setting",

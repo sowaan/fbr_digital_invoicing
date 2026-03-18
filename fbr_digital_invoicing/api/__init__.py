@@ -32,6 +32,18 @@ class FBRDigitalInvoicingAPI:
                 message=f"Error in FBR Digital Invoicing API: {request.text}"
             )
             frappe.throw(f"Error in FBR Digital Invoicing API: {request.text}")
-        return request.json()
+        try:
+            return request.json()
+        except Exception:
+            frappe.log_error(
+                title="FBR Invalid JSON Response",
+                message=f"Status: {request.status_code}\nResponse: {request.text}"
+            )
+            return {
+                "validationResponse": {
+                    "status": "Invalid",
+                    "error": request.text
+                }
+            }
     
 

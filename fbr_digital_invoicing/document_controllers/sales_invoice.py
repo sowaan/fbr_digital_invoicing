@@ -26,12 +26,17 @@ class SalesInvoice(SalesInvoiceController):
 
         settings = frappe.get_doc("FBR Digital Invoicing Setting", self.company)
         frappe.log_error("on submit", f"{self} - {self.custom_sro_no}")
-        data = self.get_mapped_data(settings)
+
+        data = {}
+        if settings.environment == "Sandbox" and settings.use_dummy_data:
+            data = self.get_sandbox_fbr_data()
+        else:
+            data = self.get_mapped_data(settings)
+        
         api_log = frappe.new_doc("FDI Request Log")
         api_log.request_data = frappe.as_json(data, indent=4)
 
         frappe.log_error(title="FBR Request Data", message=str(data))
-
 
         try:
             api = FBRDigitalInvoicingAPI(self.company)
@@ -83,9 +88,6 @@ class SalesInvoice(SalesInvoiceController):
         if not customer_address.state:
             frappe.throw("Customer primary address does not have a State/Province.")
 
-        sale_type = self.custom_sale_type if self.custom_sale_type else "Goods at standard rate (default)"
-        frappe.log_error("get mapped data", f"{self} - {self.custom_sro_no}")
-
         data = {}
         data["invoiceType"] = "Debit Note" if self.is_return else "Sale Invoice"
         
@@ -120,7 +122,7 @@ class SalesInvoice(SalesInvoiceController):
                 data["scenarioId"] = self.custom_sn_id
 
         data["items"] = self.get_items()
-
+       
         frappe.log_error(title="FBR Data", message=str(data))        
         return data
     
@@ -128,7 +130,7 @@ class SalesInvoice(SalesInvoiceController):
         items = []
         sale_type = self.custom_sale_type if self.custom_sale_type else "Goods at standard rate (default)"
         sro_no = self.custom_sro_no if self.custom_sro_no else ""
-        frappe.log_error("get items self", f"{self} - {self.custom_sro_no}")
+
         for item in self.items:
             if not item.custom_hs_code:
                 item.custom_hs_code = self.get_and_set_hs_code(item)
@@ -157,6 +159,219 @@ class SalesInvoice(SalesInvoiceController):
             items.append(item_data)
         return items
 
+    def get_sandbox_fbr_data(self):
+
+        sale_type = self.custom_sale_type if self.custom_sale_type else "Goods at standard rate (default)"
+        company = frappe.get_cached_doc("Company", self.company)
+
+        seller_data = {
+            "sellerNTNCNIC": company.tax_id,
+            "sellerBusinessName": self.company,
+            "sellerProvince": company.custom_province or "Sindh",
+            "sellerAddress": self.normalize_address(
+                self.company_address_display or ""
+            ),
+        }
+        scenario = self.custom_sn_id or "SN002"
+
+        seller_data = {
+            "sellerNTNCNIC": company.tax_id,
+            "sellerBusinessName": self.company,
+            "sellerProvince": company.custom_province or "Sindh",
+            "sellerAddress": self.normalize_address(
+                self.company_address_display or ""
+            ),
+        }
+
+        # Default scenario mapping
+        scenarios = {
+            "SN001": {
+                "buyerNTNCNIC": "2046004",
+                "buyerBusinessName": "ABC Trading Company",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Registered",
+            },
+            "SN002": {
+                "buyerNTNCNIC": "1234567",
+                "buyerBusinessName": "Walk-in Customer",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Unregistered",
+            },
+            "SN008": {
+                "buyerNTNCNIC": "3710505701479",
+                "buyerBusinessName": "Retail Chain",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Unregistered",
+                "invoiceRefNo": "0",
+            },
+            "SN026": {
+                "buyerNTNCNIC": "1000000000078",
+                "buyerBusinessName": "Retail Customer",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Registered",
+                "invoiceRefNo": "SI-20250421-001",
+            },
+            "SN027": {
+                "buyerNTNCNIC": "7000006",
+                "buyerBusinessName": "FMCG Buyer",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Unregistered",
+            },
+            "SN028": {
+                "buyerNTNCNIC": "4210116845809",
+                "buyerBusinessName": "Fast tech",
+                "buyerProvince": "Sindh",
+                "buyerAddress": "Karachi",
+                "buyerRegistrationType": "Registered",
+            },
+        }
+
+        scenario_data = scenarios.get(scenario, scenarios["SN002"])
+
+        # 🔥 Override registration type from custom field
+        # if self.custom_buyerregistrationtype:
+        #     scenario_data["buyerRegistrationType"] = self.custom_buyerregistrationtype
+
+        # Common items (can also be scenario-based if needed)
+        scenario_items = {
+
+            "SN001": [{
+                "hsCode": "0101.2100",
+                "productDescription": "Software License",
+                "rate": "18%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 400,
+                "valueSalesExcludingST": 1000,
+                "fixedNotifiedValueOrRetailPrice": 0,
+                "salesTaxApplicable": 180,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": "",
+                "furtherTax": 0,
+                "sroScheduleNo": "",
+                "fedPayable": 0,
+                "discount": 0,
+                "totalValues": 0,
+                "saleType": "Goods at standard rate (default)",
+                "sroItemSerialNo": ""
+            }],
+
+            "SN002": [{
+                "hsCode": "0101.2100",
+                "productDescription": "IT Equipment",
+                "rate": "18%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 400,
+                "valueSalesExcludingST": 1000,
+                "fixedNotifiedValueOrRetailPrice": 0,
+                "salesTaxApplicable": 180,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": "",
+                "furtherTax": 0,
+                "sroScheduleNo": "",
+                "fedPayable": 0,
+                "discount": 0,
+                "totalValues": 0,
+                "saleType": "Goods at standard rate (default)",
+                "sroItemSerialNo": ""
+            }],
+
+            "SN008": [{
+                "hsCode": "0101.2100",
+                "productDescription": "Branded Product",
+                "rate": "18%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 100,
+                "valueSalesExcludingST": 1,
+                "fixedNotifiedValueOrRetailPrice": 1000,
+                "salesTaxApplicable": 180,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": 0,
+                "furtherTax": 0,
+                "sroScheduleNo": "",
+                "fedPayable": 0,
+                "discount": 0,
+                "totalValues": 145,
+                "saleType": "3rd Schedule Goods",
+                "sroItemSerialNo": ""
+            }],
+
+            "SN026": [{
+                "hsCode": "0101.2100",
+                "productDescription": "Retail Product",
+                "rate": "18%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 123,
+                "valueSalesExcludingST": 1000,
+                "fixedNotifiedValueOrRetailPrice": 0,
+                "salesTaxApplicable": 180,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": 0,
+                "furtherTax": 0,
+                "sroScheduleNo": "",
+                "fedPayable": 0,
+                "discount": 0,
+                "totalValues": 0,
+                "saleType": "Goods at standard rate (default)",
+                "sroItemSerialNo": ""
+            }],
+
+            "SN027": [{
+                "hsCode": "0101.2100",
+                "productDescription": "FMCG Product",
+                "rate": "18%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 1,
+                "valueSalesExcludingST": 1,
+                "fixedNotifiedValueOrRetailPrice": 100,
+                "salesTaxApplicable": 18,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": 0,
+                "furtherTax": 0,
+                "sroScheduleNo": "",
+                "fedPayable": 0,
+                "discount": 0,
+                "totalValues": 0,
+                "saleType": "3rd Schedule Goods",
+                "sroItemSerialNo": ""
+            }],
+
+            "SN028": [{
+                "hsCode": "8481.8090",
+                "productDescription": "01-TP-IE-Nos",
+                "rate": "1%",
+                "uoM": "Numbers, pieces, units",
+                "quantity": 1,
+                "valueSalesExcludingST": 100,
+                "fixedNotifiedValueOrRetailPrice": 100,
+                "salesTaxApplicable": 1,
+                "salesTaxWithheldAtSource": 0,
+                "extraTax": 0,
+                "furtherTax": 0,
+                "sroScheduleNo": "SRO 2323/233232",
+                "fedPayable": 0,
+                "discount": 20,
+                "totalValues": 0,
+                "saleType": "Goods at Reduced Rate",
+                "sroItemSerialNo": "1"
+            }],
+        }
+        items = scenario_items.get(scenario)
+        data = {
+            "invoiceType": "Sale Invoice",
+            "invoiceDate": str(self.posting_date),
+            "scenarioId": scenario,
+            "items": items,
+            **seller_data,
+            **scenario_data,
+        }
+
+        return data
+    
     def get_and_set_uom(self, hs_code):
         hs_code_doc = frappe.new_doc("HS Code")
         if frappe.db.exists("HS Code", hs_code):
